@@ -11,6 +11,7 @@
 
 import { useSearchParams } from 'react-router-dom';
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useAuth } from '../context/AuthContext'
 import { userService } from '../services/userService'
 import { myPageService } from '../services/myPageService'
@@ -914,7 +915,10 @@ const MyPage = () => {
           </div>
         </div>
 
-        {/* 모바일 하단 네비게이션 */}
+      </div>
+
+      {/* 모바일 하단 네비게이션 - Portal로 body에 직접 렌더링하여 z-index 문제 해결 */}
+      {createPortal(
         <nav className="mobile-bottom-nav">
           <button
             onClick={() => setIsProfileModalOpen(true)}
@@ -951,329 +955,336 @@ const MyPage = () => {
             <span className="mobile-nav-icon">⋯</span>
             <span className="mobile-nav-label">더보기</span>
           </button>
-        </nav>
+        </nav>,
+        document.body
+      )}
 
-        {/* 프로필 모달 (모바일) */}
-        {isProfileModalOpen && profile && (
-          <>
-            <div
-              className="profile-modal-overlay"
-              onClick={() => setIsProfileModalOpen(false)}
-            ></div>
-            <div className="profile-modal">
-              <div className="profile-modal-header">
-                <h2>프로필</h2>
+      {/* 프로필 모달 (모바일) */}
+      {isProfileModalOpen && profile && createPortal(
+        <>
+          <div
+            className="profile-modal-overlay"
+            style={{ display: 'block' }}
+            onClick={() => setIsProfileModalOpen(false)}
+          ></div>
+          <div className="profile-modal" style={{ display: 'flex' }}>
+            <div className="profile-modal-header">
+              <h2>프로필</h2>
+              <button
+                className="profile-modal-close"
+                onClick={() => setIsProfileModalOpen(false)}
+                aria-label="닫기"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="profile-modal-content">
+              <div className="profile-modal-avatar">
+                <UserAvatar
+                  src={profile.profileImage}
+                  alt={profile.nickname}
+                  size="large"
+                />
+              </div>
+              <h2 className="profile-modal-name">{profile.nickname || '이름 없음'}</h2>
+              {profile.bio && <p className="profile-modal-bio">{profile.bio}</p>}
+
+              <div className="profile-modal-stats">
                 <button
-                  className="profile-modal-close"
-                  onClick={() => setIsProfileModalOpen(false)}
-                  aria-label="닫기"
+                  className="profile-modal-stat-item"
+                  onClick={() => {
+                    setIsProfileModalOpen(false)
+                    handleTabChange('my-debate')
+                  }}
                 >
-                  ✕
+                  <span className="profile-modal-stat-value">{profile.debateCount ?? 0}</span>
+                  <span className="profile-modal-stat-label">작성한 토론</span>
+                </button>
+                <button
+                  className="profile-modal-stat-item"
+                  onClick={() => {
+                    setIsProfileModalOpen(false)
+                    handleTabChange('participated')
+                  }}
+                >
+                  <span className="profile-modal-stat-value">{profile.participatedCount ?? 0}</span>
+                  <span className="profile-modal-stat-label">참여한 토론</span>
+                </button>
+                <button
+                  className="profile-modal-stat-item"
+                  onClick={() => {
+                    setIsProfileModalOpen(false)
+                    handleTabChange('likes')
+                  }}
+                >
+                  <span className="profile-modal-stat-value">{profile.likeCount ?? 0}</span>
+                  <span className="profile-modal-stat-label">받은 좋아요</span>
                 </button>
               </div>
-              <div className="profile-modal-content">
-                <div className="profile-modal-avatar">
-                  <UserAvatar
-                    src={profile.profileImage}
-                    alt={profile.nickname}
-                    size="large"
+
+              <div className="profile-modal-actions">
+                <Link
+                  to="/my/edit"
+                  className="btn btn-primary"
+                  onClick={() => setIsProfileModalOpen(false)}
+                >
+                  프로필 수정
+                </Link>
+                <Link
+                  to="/my/settings"
+                  className="btn btn-outline"
+                  onClick={() => setIsProfileModalOpen(false)}
+                >
+                  계정 설정
+                </Link>
+              </div>
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+
+      {/* 더보기 메뉴 모달 (모바일) */}
+      {isMoreMenuModalOpen && createPortal(
+        <>
+          <div
+            className="more-menu-modal-overlay"
+            style={{ display: 'block' }}
+            onClick={() => setIsMoreMenuModalOpen(false)}
+          ></div>
+          <div className="more-menu-modal" style={{ display: 'flex' }}>
+            <div className="more-menu-modal-header">
+              <h2>더보기</h2>
+              <button
+                className="more-menu-modal-close"
+                onClick={() => setIsMoreMenuModalOpen(false)}
+                aria-label="닫기"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="more-menu-modal-content">
+              <nav className="more-menu-modal-nav">
+                <button
+                  onClick={() => {
+                    setIsMoreMenuModalOpen(false)
+                    handleTabChange('comments')
+                  }}
+                  className="more-menu-nav-item"
+                >
+                  <span className="more-menu-nav-icon">💬</span>
+                  <span className="more-menu-nav-label">내 댓글</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMoreMenuModalOpen(false)
+                    handleTabChange('likes')
+                  }}
+                  className="more-menu-nav-item"
+                >
+                  <span className="more-menu-nav-icon">👍</span>
+                  <span className="more-menu-nav-label">받은 좋아요</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMoreMenuModalOpen(false)
+                    handleTabChange('bookmarks')
+                  }}
+                  className="more-menu-nav-item"
+                >
+                  <span className="more-menu-nav-icon">🔖</span>
+                  <span className="more-menu-nav-label">북마크</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMoreMenuModalOpen(false)
+                    handleTabChange('messages')
+                  }}
+                  className="more-menu-nav-item"
+                >
+                  <span className="more-menu-nav-icon">📮</span>
+                  <span className="more-menu-nav-label">우편함</span>
+                  {unreadMessageCount > 0 && <span className="badge-count-mobile">{unreadMessageCount}</span>}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMoreMenuModalOpen(false)
+                    handleTabChange('activity')
+                  }}
+                  className="more-menu-nav-item"
+                >
+                  <span className="more-menu-nav-icon">📋</span>
+                  <span className="more-menu-nav-label">활동 내역</span>
+                </button>
+              </nav>
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+      {/* 쪽지 보내기 모달 */}
+      {isMessageComposeModalOpen && createPortal(
+        <>
+          <div
+            className="modal-overlay"
+            onClick={() => {
+              setIsMessageComposeModalOpen(false)
+              setMessageForm({ receiverNickname: '', content: '' })
+            }}
+          ></div>
+          <div className="message-modal">
+            <div className="message-modal-header">
+              <h2>✉️ 쪽지 보내기</h2>
+              <button
+                className="message-modal-close"
+                onClick={() => {
+                  setIsMessageComposeModalOpen(false)
+                  setMessageForm({ receiverNickname: '', content: '' })
+                }}
+                aria-label="닫기"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="message-modal-content">
+              <form onSubmit={handleSendMessage}>
+                <div className="form-group">
+                  <label htmlFor="receiverNickname">받는 사람 (닉네임)</label>
+                  <input
+                    type="text"
+                    id="receiverNickname"
+                    className="form-input"
+                    placeholder="받는 사람의 닉네임을 입력하세요"
+                    value={messageForm.receiverNickname}
+                    onChange={(e) => setMessageForm({ ...messageForm, receiverNickname: e.target.value })}
+                    disabled={sendingMessage}
+                    required
                   />
                 </div>
-                <h2 className="profile-modal-name">{profile.nickname || '이름 없음'}</h2>
-                {profile.bio && <p className="profile-modal-bio">{profile.bio}</p>}
 
-                <div className="profile-modal-stats">
-                  <button
-                    className="profile-modal-stat-item"
-                    onClick={() => {
-                      setIsProfileModalOpen(false)
-                      handleTabChange('my-debate')
-                    }}
-                  >
-                    <span className="profile-modal-stat-value">{profile.debateCount ?? 0}</span>
-                    <span className="profile-modal-stat-label">작성한 토론</span>
-                  </button>
-                  <button
-                    className="profile-modal-stat-item"
-                    onClick={() => {
-                      setIsProfileModalOpen(false)
-                      handleTabChange('participated')
-                    }}
-                  >
-                    <span className="profile-modal-stat-value">{profile.participatedCount ?? 0}</span>
-                    <span className="profile-modal-stat-label">참여한 토론</span>
-                  </button>
-                  <button
-                    className="profile-modal-stat-item"
-                    onClick={() => {
-                      setIsProfileModalOpen(false)
-                      handleTabChange('likes')
-                    }}
-                  >
-                    <span className="profile-modal-stat-value">{profile.likeCount ?? 0}</span>
-                    <span className="profile-modal-stat-label">받은 좋아요</span>
-                  </button>
-                </div>
-
-                <div className="profile-modal-actions">
-                  <Link
-                    to="/my/edit"
-                    className="btn btn-primary"
-                    onClick={() => setIsProfileModalOpen(false)}
-                  >
-                    프로필 수정
-                  </Link>
-                  <Link
-                    to="/my/settings"
-                    className="btn btn-outline"
-                    onClick={() => setIsProfileModalOpen(false)}
-                  >
-                    계정 설정
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* 더보기 메뉴 모달 (모바일) */}
-        {isMoreMenuModalOpen && (
-          <>
-            <div
-              className="more-menu-modal-overlay"
-              onClick={() => setIsMoreMenuModalOpen(false)}
-            ></div>
-            <div className="more-menu-modal">
-              <div className="more-menu-modal-header">
-                <h2>더보기</h2>
-                <button
-                  className="more-menu-modal-close"
-                  onClick={() => setIsMoreMenuModalOpen(false)}
-                  aria-label="닫기"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="more-menu-modal-content">
-                <nav className="more-menu-modal-nav">
-                  <button
-                    onClick={() => {
-                      setIsMoreMenuModalOpen(false)
-                      handleTabChange('comments')
-                    }}
-                    className="more-menu-nav-item"
-                  >
-                    <span className="more-menu-nav-icon">💬</span>
-                    <span className="more-menu-nav-label">내 댓글</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsMoreMenuModalOpen(false)
-                      handleTabChange('likes')
-                    }}
-                    className="more-menu-nav-item"
-                  >
-                    <span className="more-menu-nav-icon">👍</span>
-                    <span className="more-menu-nav-label">받은 좋아요</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsMoreMenuModalOpen(false)
-                      handleTabChange('bookmarks')
-                    }}
-                    className="more-menu-nav-item"
-                  >
-                    <span className="more-menu-nav-icon">🔖</span>
-                    <span className="more-menu-nav-label">북마크</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsMoreMenuModalOpen(false)
-                      handleTabChange('messages')
-                    }}
-                    className="more-menu-nav-item"
-                  >
-                    <span className="more-menu-nav-icon">📮</span>
-                    <span className="more-menu-nav-label">우편함</span>
-                    {unreadMessageCount > 0 && <span className="badge-count-mobile">{unreadMessageCount}</span>}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsMoreMenuModalOpen(false)
-                      handleTabChange('activity')
-                    }}
-                    className="more-menu-nav-item"
-                  >
-                    <span className="more-menu-nav-icon">📋</span>
-                    <span className="more-menu-nav-label">활동 내역</span>
-                  </button>
-                </nav>
-              </div>
-            </div>
-          </>
-        )}
-        {/* 쪽지 보내기 모달 */}
-        {isMessageComposeModalOpen && (
-          <>
-            <div
-              className="modal-overlay"
-              onClick={() => {
-                setIsMessageComposeModalOpen(false)
-                setMessageForm({ receiverNickname: '', content: '' })
-              }}
-            ></div>
-            <div className="message-modal">
-              <div className="message-modal-header">
-                <h2>✉️ 쪽지 보내기</h2>
-                <button
-                  className="message-modal-close"
-                  onClick={() => {
-                    setIsMessageComposeModalOpen(false)
-                    setMessageForm({ receiverNickname: '', content: '' })
-                  }}
-                  aria-label="닫기"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="message-modal-content">
-                <form onSubmit={handleSendMessage}>
-                  <div className="form-group">
-                    <label htmlFor="receiverNickname">받는 사람 (닉네임)</label>
-                    <input
-                      type="text"
-                      id="receiverNickname"
-                      className="form-input"
-                      placeholder="받는 사람의 닉네임을 입력하세요"
-                      value={messageForm.receiverNickname}
-                      onChange={(e) => setMessageForm({ ...messageForm, receiverNickname: e.target.value })}
-                      disabled={sendingMessage}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="content">내용</label>
-                    <textarea
-                      id="content"
-                      className="form-textarea"
-                      placeholder="쪽지 내용을 입력하세요"
-                      value={messageForm.content}
-                      onChange={(e) => setMessageForm({ ...messageForm, content: e.target.value })}
-                      disabled={sendingMessage}
-                      rows="6"
-                      required
-                    />
-                  </div>
-
-                  <div className="message-modal-actions">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsMessageComposeModalOpen(false)
-                        setMessageForm({ receiverNickname: '', content: '' })
-                      }}
-                      className="btn btn-outline"
-                      disabled={sendingMessage}
-                    >
-                      취소
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn btn-primary"
-                      disabled={sendingMessage}
-                    >
-                      {sendingMessage ? '보내는 중...' : '보내기'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* 쪽지 상세 모달 */}
-        {isMessageModalOpen && selectedMessage && (
-          <>
-            <div
-              className="modal-overlay"
-              onClick={() => {
-                setIsMessageModalOpen(false)
-                setSelectedMessage(null)
-              }}
-            ></div>
-            <div className="message-modal">
-              <div className="message-modal-header">
-                <h2>📬 쪽지 상세</h2>
-                <button
-                  className="message-modal-close"
-                  onClick={() => {
-                    setIsMessageModalOpen(false)
-                    setSelectedMessage(null)
-                  }}
-                  aria-label="닫기"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="message-modal-content">
-                <div className="message-detail">
-                  <div className="message-detail-header">
-                    <div className="message-detail-user">
-                      <span className="message-icon">👤</span>
-                      <div>
-                        <div className="message-detail-label">
-                          {messageTab === 'received' ? '보낸 사람' : '받는 사람'}
-                        </div>
-                        <strong>
-                          {messageTab === 'received'
-                            ? selectedMessage.senderNickname || '알 수 없음'
-                            : selectedMessage.receiverNickname || '알 수 없음'}
-                        </strong>
-                      </div>
-                    </div>
-                    <div className="message-detail-status">
-                      {messageTab === 'sent' && (
-                        <span className={`badge-read-status ${selectedMessage.isRead ? 'read' : 'unread-sent'}`}>
-                          {selectedMessage.isRead ? '읽음' : '안 읽음'}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="message-detail-time">
-                    {formatRelativeTime(selectedMessage.createdAt)}
-                  </div>
-
-                  <div className="message-detail-content">
-                    {selectedMessage.content}
-                  </div>
+                <div className="form-group">
+                  <label htmlFor="content">내용</label>
+                  <textarea
+                    id="content"
+                    className="form-textarea"
+                    placeholder="쪽지 내용을 입력하세요"
+                    value={messageForm.content}
+                    onChange={(e) => setMessageForm({ ...messageForm, content: e.target.value })}
+                    disabled={sendingMessage}
+                    rows="6"
+                    required
+                  />
                 </div>
 
                 <div className="message-modal-actions">
                   <button
+                    type="button"
                     onClick={() => {
-                      setIsMessageModalOpen(false)
-                      setSelectedMessage(null)
+                      setIsMessageComposeModalOpen(false)
+                      setMessageForm({ receiverNickname: '', content: '' })
                     }}
                     className="btn btn-outline"
+                    disabled={sendingMessage}
                   >
-                    닫기
+                    취소
                   </button>
-                  {messageTab === 'received' && (
-                    <button
-                      onClick={() => handleReply(selectedMessage)}
-                      className="btn btn-primary"
-                    >
-                      ↩️ 답장하기
-                    </button>
-                  )}
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={sendingMessage}
+                  >
+                    {sendingMessage ? '보내는 중...' : '보내기'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+
+      {/* 쪽지 상세 모달 */}
+      {isMessageModalOpen && selectedMessage && createPortal(
+        <>
+          <div
+            className="modal-overlay"
+            onClick={() => {
+              setIsMessageModalOpen(false)
+              setSelectedMessage(null)
+            }}
+          ></div>
+          <div className="message-modal">
+            <div className="message-modal-header">
+              <h2>📬 쪽지 상세</h2>
+              <button
+                className="message-modal-close"
+                onClick={() => {
+                  setIsMessageModalOpen(false)
+                  setSelectedMessage(null)
+                }}
+                aria-label="닫기"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="message-modal-content">
+              <div className="message-detail">
+                <div className="message-detail-header">
+                  <div className="message-detail-user">
+                    <span className="message-icon">👤</span>
+                    <div>
+                      <div className="message-detail-label">
+                        {messageTab === 'received' ? '보낸 사람' : '받는 사람'}
+                      </div>
+                      <strong>
+                        {messageTab === 'received'
+                          ? selectedMessage.senderNickname || '알 수 없음'
+                          : selectedMessage.receiverNickname || '알 수 없음'}
+                      </strong>
+                    </div>
+                  </div>
+                  <div className="message-detail-status">
+                    {messageTab === 'sent' && (
+                      <span className={`badge-read-status ${selectedMessage.isRead ? 'read' : 'unread-sent'}`}>
+                        {selectedMessage.isRead ? '읽음' : '안 읽음'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="message-detail-time">
+                  {formatRelativeTime(selectedMessage.createdAt)}
+                </div>
+
+                <div className="message-detail-content">
+                  {selectedMessage.content}
                 </div>
               </div>
+
+              <div className="message-modal-actions">
+                <button
+                  onClick={() => {
+                    setIsMessageModalOpen(false)
+                    setSelectedMessage(null)
+                  }}
+                  className="btn btn-outline"
+                >
+                  닫기
+                </button>
+                {messageTab === 'received' && (
+                  <button
+                    onClick={() => handleReply(selectedMessage)}
+                    className="btn btn-primary"
+                  >
+                    ↩️ 답장하기
+                  </button>
+                )}
+              </div>
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        </>,
+        document.body
+      )}
     </div>
   )
 }

@@ -111,8 +111,10 @@ const MyPageEdit = () => {
     const newErrors = { ...errors };
 
     if (name === "nickname") {
-      if (value && (value.length < 2 || value.length > 20)) {
-        newErrors.nickname = "닉네임은 2-20자 사이여야 합니다.";
+      // 닉네임: 2~8자, 공백 없이, 한글/영문/숫자만 허용
+      const nicknameRegex = /^[가-힣a-zA-Z0-9]{2,8}$/;
+      if (value && !nicknameRegex.test(value)) {
+        newErrors.nickname = "닉네임은 2~8자, 공백 없이 한글/영문/숫자만 가능합니다.";
       } else {
         delete newErrors.nickname;
       }
@@ -135,11 +137,10 @@ const MyPageEdit = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (
-      formData.nickname &&
-      (formData.nickname.length < 2 || formData.nickname.length > 20)
-    ) {
-      newErrors.nickname = "닉네임은 2-20자 사이여야 합니다.";
+    // 닉네임: 2~8자, 공백 없이, 한글/영문/숫자만 허용
+    const nicknameRegex = /^[가-힣a-zA-Z0-9]{2,8}$/;
+    if (formData.nickname && !nicknameRegex.test(formData.nickname)) {
+      newErrors.nickname = "닉네임은 2~8자, 공백 없이 한글/영문/숫자만 가능합니다.";
     }
 
     if (formData.bio && formData.bio.length > 200) {
@@ -457,7 +458,7 @@ const MyPageEdit = () => {
                     className={`form-input form-input-nickname ${errors.nickname ? "error" : ""} ${formData.nickname && !errors.nickname ? "valid" : ""}`}
                     value={formData.nickname}
                     onChange={handleChange}
-                    placeholder="2-20자 사이의 닉네임을 입력하세요"
+                    placeholder="닉네임은 2~8자,공백 없이 한글/영문/숫자만 가능"
                   />
                 </div>
                 <div className="nickname-footer">

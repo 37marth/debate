@@ -685,8 +685,8 @@ const Header = () => {
 
               {/* 프로필 메뉴 */}
               <Link
-                to="/mypage"
-                className={`nav-item ${isActive("/mypage") ? "active" : ""}`}
+                to="/my"
+                className={`nav-item ${isActive("/my") ? "active" : ""}`}
                 onClick={closeSidebar}
               >
                 <svg
