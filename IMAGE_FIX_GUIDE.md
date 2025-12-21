@@ -218,3 +218,6 @@ app:
 - 백엔드 파일 저장 경로: `/home/ubuntu/opt/debate/files/editor/images`
 - 백엔드 파일 URL prefix: `/files/editor/images`
 
+
+
+
