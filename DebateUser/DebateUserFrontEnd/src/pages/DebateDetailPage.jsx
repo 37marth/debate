@@ -21,6 +21,7 @@ const DebateDetailPage = () => {
   const [debate, setDebate] = useState(null);
   const [comments, setComments] = useState([]);
   const [opinions, setOpinions] = useState([]);
+  const [bestComments, setBestComments] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -133,9 +134,10 @@ const DebateDetailPage = () => {
       if (!debate) setLoading(true);
       setError(null);
 
-      const [debateRes, opinionsRes] = await Promise.all([
+      const [debateRes, opinionsRes, bestCommentsRes] = await Promise.all([
         debateService.getDebateById(id),
         opinionService.getOpinionsByDebate(id),
+        commentService.getBestCommentsByDebate(id).catch(() => ({ data: [] })),
       ]);
 
       const debateData = debateRes.data || debateRes;
@@ -147,6 +149,7 @@ const DebateDetailPage = () => {
 
       setDebate(debateData);
       setOpinions(opinionsRes.data || opinionsRes || []);
+      setBestComments(bestCommentsRes?.data || bestCommentsRes || []);
 
       // 댓글은 별도 함수로 호출 (페이징/정렬 적용)
       await fetchComments();
@@ -577,6 +580,67 @@ const DebateDetailPage = () => {
   const handleBackToList = () => {
     const state = location.state || {};
     navigate("/debate", { state });
+  };
+
+  // 베스트 댓글 렌더링 헬퍼
+  const renderBestComments = () => {
+    if (!bestComments || bestComments.length === 0) return null;
+
+    return (
+      <div className="best-comments-wrapper">
+        <h4 className="best-comments-title">✨ 베스트 댓글</h4>
+        {bestComments.map((comment, index) => {
+          const isModified =
+            !comment.isDeleted && comment.updatedAt && comment.updatedAt !== comment.createdAt;
+
+          return (
+            <div key={`best-${comment.id}`} className="comment-block best-comment-block">
+              <div className="comment-row root relative-block">
+                <div className="best-badge-ribbon">BEST {index + 1}</div>
+                <div className="comment-avatar">
+                  <UserAvatar
+                    src={comment.profileImage}
+                    alt={comment.nickname}
+                    size="medium"
+                  />
+                </div>
+                <div className="comment-main">
+                  <div className="comment-header">
+                    <span className="name">
+                      <span
+                        className="clickable-nickname"
+                        onClick={() => navigate(`/users/${comment.userId}`)}
+                      >
+                        {comment.nickname}
+                      </span>
+                    </span>
+                    <span className="time">
+                      {format(new Date(comment.createdAt), "MM.dd HH:mm")}
+                      {isModified && " (수정됨)"}
+                    </span>
+                  </div>
+
+                  <p
+                    className={`comment-text ${comment.isDeleted ? "deleted" : ""}`}
+                    style={comment.isDeleted ? { color: "#999", fontStyle: "italic" } : {}}
+                  >
+                    {comment.content}
+                  </p>
+
+                  {!comment.isDeleted && (
+                    <div className="comment-actions">
+                      <div className="comment-like-btn active" style={{ cursor: "default", opacity: 1 }}>
+                        ❤️ {comment.likeCount || 0}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
   };
 
   // 댓글 렌더링 헬퍼
@@ -1201,6 +1265,7 @@ const DebateDetailPage = () => {
             </button>
           </form>
 
+          {renderBestComments()}
           <div className="comment-list">{renderComments()}</div>
 
           {/* [추가] 페이지네이션 */}

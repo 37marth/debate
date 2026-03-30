@@ -63,8 +63,7 @@ public class CommentService {
                         parent.getUser(),
                         user.getNickname() + "님이 대댓글을 남겼습니다: " + truncateContent(comment.getContent()),
                         "COMMENT",
-                        "/debate/" + debate.getId()
-                );
+                        "/debate/" + debate.getId());
             }
             // 2. 일반 댓글인 경우 토론 작성자에게 알림 (대댓글이 아닐 때만, 그리고 본인이 아닐 때)
             else if (parent == null && !debate.getUser().getId().equals(userId)) {
@@ -72,8 +71,7 @@ public class CommentService {
                         debate.getUser(),
                         user.getNickname() + "님이 토론에 댓글을 남겼습니다: " + truncateContent(comment.getContent()),
                         "COMMENT",
-                        "/debate/" + debate.getId()
-                );
+                        "/debate/" + debate.getId());
             }
         } catch (Exception e) {
             // 알림 생성 실패가 핵심 로직에 영향을 주지 않도록 예외 처리
@@ -84,7 +82,8 @@ public class CommentService {
     }
 
     private String truncateContent(String content) {
-        if (content == null) return "";
+        if (content == null)
+            return "";
         return content.length() > 15 ? content.substring(0, 20) + "..." : content;
     }
 
@@ -96,7 +95,7 @@ public class CommentService {
 
         return comments.map(comment -> {
             CommentResponse response = CommentResponse.from(comment);
-            
+
             // 현재 사용자가 좋아요를 눌렀는지 확인
             if (userId != null) {
                 response.setLiked(commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), userId));
@@ -107,7 +106,8 @@ public class CommentService {
                     .map(reply -> {
                         CommentResponse replyResponse = CommentResponse.from(reply);
                         if (userId != null) {
-                            replyResponse.setLiked(commentLikeRepository.existsByCommentIdAndUserId(reply.getId(), userId));
+                            replyResponse
+                                    .setLiked(commentLikeRepository.existsByCommentIdAndUserId(reply.getId(), userId));
                         }
                         return replyResponse;
                     })
@@ -127,12 +127,12 @@ public class CommentService {
 
         // 1. 대댓글 존재 여부 확인
         List<Comment> replies = commentRepository.findByParent(comment);
-        
+
         if (!replies.isEmpty()) {
             // 대댓글이 있으면 Soft Delete (삭제 상태로 변경)
             comment.setIsDeleted(true);
             commentRepository.save(comment);
-            
+
             // 좋아요는 삭제 (선택 사항이나 깔끔하게 제거)
             commentLikeRepository.deleteByCommentId(commentId);
         } else {
@@ -153,12 +153,12 @@ public class CommentService {
             commentLikeRepository.deleteByCommentIdAndUserId(commentId, userId);
         } else {
             User user = userRepository.getReferenceById(userId);
-            
+
             com.debate.entity.CommentLike like = com.debate.entity.CommentLike.builder()
                     .comment(comment)
                     .user(user)
                     .build();
-            
+
             commentLikeRepository.save(like);
 
             // 좋아요 알림 생성 (본인이 아닐 경우)
@@ -168,14 +168,53 @@ public class CommentService {
                             comment.getUser(),
                             user.getNickname() + "님이 댓글을 좋아합니다.",
                             "LIKE",
-                            "/debate/" + comment.getDebate().getId()
-                    );
+                            "/debate/" + comment.getDebate().getId());
                 } catch (Exception e) {
                     System.err.println("알림 생성 실패: " + e.getMessage());
                 }
             }
         }
     }
+
+    // DB 데이터를 읽기만 하는 메서드 → readOnly=true 로 성능 최적화 (수정 없으니 불필요한 감시 생략)
+    @Transactional(readOnly = true)
+    public List<CommentResponse> getBestCommentsByDebate(Long debateId, Long userId) {
+        // debateId(게시글 번호)로 토론 게시글을 DB에서 조회. 없으면 에러 발생
+        Debate debate = debateRepository.findById(debateId)
+                .orElseThrow(() -> new ResourceNotFoundException("토론을 찾을 수 없습니다"));
+
+        // Repository에 만든 메서드 호출 → 좋아요 많은 순으로 베스트 댓글 3개 가져오기
+        List<Comment> bestComments = commentRepository
+                .findTop3ByDebateAndIsDeletedFalseAndIsHiddenFalseAndParentIsNullAndLikeCountGreaterThanOrderByLikeCountDesc(
+                        debate, 0);
+
+        // 댓글 목록을 하나씩 꺼내서 프론트에 보낼 Response 형태로 변환 (stream = 반복 처리)
+        return bestComments.stream().map(comment -> {
+            // Comment(DB 엔티티) → CommentResponse(프론트에 보낼 DTO)로 변환
+            CommentResponse response = CommentResponse.from(comment);
+
+            // 현재 로그인한 사용자가 이 베스트 댓글에 좋아요를 눌렀는지 확인
+            if (userId != null) {
+                response.setLiked(commentLikeRepository.existsByCommentIdAndUserId(comment.getId(), userId));
+            }
+            // 베스트 댓글 하위에 달린 대댓글들도 함께 조회하여 세팅
+            List<Comment> replies = commentRepository.findByParent(comment);
+            response.setReplies(replies.stream()
+                    .map(reply -> {
+                        // 대댓글도 마찬가지로 CommentResponse로 변환
+                        CommentResponse replyResponse = CommentResponse.from(reply);
+                        // 대댓글에도 현재 사용자가 좋아요 눌렀는지 확인
+                        if (userId != null) {
+                            replyResponse
+                                    .setLiked(commentLikeRepository.existsByCommentIdAndUserId(reply.getId(), userId));
+                        }
+                        return replyResponse;
+                    })
+                    .collect(Collectors.toList()));
+            return response;
+        }).collect(Collectors.toList());
+    }
+
     @Transactional
     public CommentResponse updateComment(Long commentId, Long userId, String content) {
         Comment comment = commentRepository.findById(commentId)
@@ -189,4 +228,3 @@ public class CommentService {
         return CommentResponse.from(comment);
     }
 }
-

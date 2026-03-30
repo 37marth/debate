@@ -29,6 +29,16 @@ export const commentService = {
     })
     return response.data
   },
+  /**
+   * 베스트 댓글 목록 조회
+   * * 특정 토론의 베스트 댓글 상위 3개를 가져옵니다.
+   * * @param {number} debateId - 토론 ID
+   * @returns {Promise<Object>} ApiResponse 구조의 응답 데이터
+   */
+  async getBestCommentsByDebate(debateId) {
+    const response = await api.get(`/comments/debate/${debateId}/best`)
+    return response.data
+  },
 
   /**
    * 댓글 작성

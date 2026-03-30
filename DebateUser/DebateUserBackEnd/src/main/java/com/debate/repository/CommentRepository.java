@@ -21,4 +21,17 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByUserAndIsHiddenFalse(User user, Pageable pageable);
 
     long countByDebateAndIsHiddenFalse(Debate debate);
+
+    List<Comment> findTop3ByDebateAndIsDeletedFalseAndIsHiddenFalseAndParentIsNullAndLikeCountGreaterThanOrderByLikeCountDesc(Debate debate, int likeCount);
+    //findTop3: 최상위 3개만 찾아라
+    //
+    //ByDebate: 특정 토론 게시글 안에서
+    //
+    //AndIsDeletedFalse: 그리고 (소프트) 삭제 처리가 되지 않았으며
+    //
+    //AndIsHiddenFalse: 그리고 관리자에 의해 숨김 처리되지 않았고
+    //
+    //AndParentIsNull: 그리고 부모 댓글이 없는 (즉, 대댓글이 아닌 원본 댓글 중에서)
+    //
+    //OrderByLikeCountDesc: 좋아요 수(likeCount)가 가장 많은 순서대로(내림차순) 정렬해서.
 }

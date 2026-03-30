@@ -81,5 +81,18 @@ public class CommentController {
         CommentResponse response = commentService.updateComment(id, userId, request.getContent());
         return ResponseEntity.ok(ApiResponse.success("댓글이 수정되었습니다", response));
     }
+    @GetMapping("/debate/{debateId}/best")
+    public ResponseEntity<ApiResponse<java.util.List<CommentResponse>>> getBestComments(
+            @PathVariable Long debateId) {
+        Long userId = null;
+        try {
+            userId = securityUtil.getCurrentUserId();
+        } catch (Exception e) {
+            // 비로그인 사용자도 베스트 댓글을 볼 수 있도록 예외 무시
+        }
+
+        java.util.List<CommentResponse> response = commentService.getBestCommentsByDebate(debateId, userId);
+        return ResponseEntity.ok(ApiResponse.success("베스트 댓글 조회 성공", response));
+    }
 }
 
