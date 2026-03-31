@@ -22,7 +22,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     long countByDebateAndIsHiddenFalse(Debate debate);
 
-    List<Comment> findTop3ByDebateAndIsDeletedFalseAndIsHiddenFalseAndParentIsNullAndLikeCountGreaterThanOrderByLikeCountDesc(Debate debate, int likeCount);
+    List<Comment> findTop3ByDebateAndIsDeletedFalseAndIsHiddenFalseAndParentIsNullOrderByLikeCountDesc(Debate debate);
     //findTop3: 최상위 3개만 찾아라
     //
     //ByDebate: 특정 토론 게시글 안에서

@@ -185,8 +185,10 @@ public class CommentService {
 
         // Repository에 만든 메서드 호출 → 좋아요 많은 순으로 베스트 댓글 3개 가져오기
         List<Comment> bestComments = commentRepository
-                .findTop3ByDebateAndIsDeletedFalseAndIsHiddenFalseAndParentIsNullAndLikeCountGreaterThanOrderByLikeCountDesc(
-                        debate, 0);
+                .findTop3ByDebateAndIsDeletedFalseAndIsHiddenFalseAndParentIsNullOrderByLikeCountDesc(debate);
+
+        // [중요 로직] 자바 레벨에서 좋아요 0개짜리 베스트 댓글 제거 (최소 1표 이상만 노출)
+        bestComments.removeIf(comment -> comment.getLikeCount() <= 0);
 
         // 댓글 목록을 하나씩 꺼내서 프론트에 보낼 Response 형태로 변환 (stream = 반복 처리)
         return bestComments.stream().map(comment -> {
