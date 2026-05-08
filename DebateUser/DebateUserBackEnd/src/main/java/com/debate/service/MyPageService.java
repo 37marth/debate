@@ -3,7 +3,6 @@ package com.debate.service;
 import com.debate.dto.response.DebateResponse;
 import com.debate.dto.response.CommentResponse;
 import com.debate.dto.response.DebateOpinionResponse;
-import com.debate.entity.DebateOpinion;
 import com.debate.entity.User;
 import com.debate.repository.DebateOpinionRepository;
 import com.debate.repository.DebateRepository;

@@ -60,8 +60,11 @@ public class AdminCommentService {
      * @param pageable 페이지 정보
      * @return 댓글 페이지 결과
      */
-    public Page<Comment> searchComments(String keyword, Boolean isHidden, Pageable pageable) {
-        return commentRepository.searchComments(keyword, isHidden, pageable);
+    public Page<CommentResponse> searchComments(String keyword, Boolean isHidden, Pageable pageable) {
+        // Comment 엔티티를 그대로 반환하면 Lazy Loading 문제로 500 에러 발생
+        // → CommentResponse DTO로 변환해서 반환
+        Page<Comment> comments = commentRepository.searchComments(keyword, isHidden, pageable);
+        return comments.map(CommentResponse::from);
     }
 
     /**
@@ -71,9 +74,11 @@ public class AdminCommentService {
      * @return 댓글 엔티티
      * @throws ResourceNotFoundException 댓글이 없을 때
      */
-    public Comment getCommentById(Long commentId) {
-        return commentRepository.findById(commentId)
+    public CommentResponse getCommentById(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("댓글을 찾을 수 없습니다"));
+        return CommentResponse.from(comment);
+
     }
 
     /**
@@ -83,10 +88,11 @@ public class AdminCommentService {
      * @return 숨김 상태가 변경된 댓글
      */
     @Transactional
-    public Comment toggleCommentHidden(Long commentId) {
-        Comment comment = getCommentById(commentId);
+    public CommentResponse toggleCommentHidden(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("댓글을 찾을 수 없습니다"));
         comment.setIsHidden(!comment.getIsHidden());
-        return commentRepository.save(comment);
+        return CommentResponse.from(commentRepository.save(comment));
     }
 
     /**
@@ -96,8 +102,8 @@ public class AdminCommentService {
      */
     @Transactional
     public void deleteComment(Long commentId) {
-        Comment comment = getCommentById(commentId);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("댓글을 찾을 수 없습니다"));
         commentRepository.delete(comment);
     }
 }
-

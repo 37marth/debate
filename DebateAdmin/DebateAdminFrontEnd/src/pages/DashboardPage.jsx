@@ -99,7 +99,6 @@ const DashboardPage = () => {
           <div className="stat-info-admin">
             <div className="stat-label-admin">오늘 방문자</div>
             <div className="stat-value-admin">{stats?.todayVisitors || 0}</div>
-            <div className="stat-change positive">+234 어제 대비</div>
           </div>
         </div>
       </div>

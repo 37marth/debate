@@ -2,7 +2,6 @@ package com.debate.service;
 
 import com.debate.dto.response.UserRankingResponse;
 import com.debate.dto.response.UserResponse;
-import com.debate.entity.Debate;
 import com.debate.entity.User;
 import com.debate.exception.ResourceNotFoundException;
 import com.debate.repository.DebateOpinionRepository;
@@ -14,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import org.springframework.data.domain.Sort;
 
 @Service
 @RequiredArgsConstructor

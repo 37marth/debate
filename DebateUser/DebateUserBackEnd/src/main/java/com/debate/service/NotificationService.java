@@ -7,7 +7,7 @@ import com.debate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,10 +86,7 @@ public class NotificationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
         
-        // 안 읽은 알림들을 가져와서 모두 읽음 처리
-        // (성능 최적화를 위해 벌크 업데이트 쿼리를 사용할 수도 있음)
-        // 여기서는 간단하게 구현
-        // 실제로는 Repository에 @Modifying 쿼리를 추가하는 것이 좋음
+        notificationRepository.markAllAsRead(user);
     }
 
     private Map<String, Object> convertToDto(Notification notification) {

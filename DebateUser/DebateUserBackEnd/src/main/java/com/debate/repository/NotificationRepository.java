@@ -5,6 +5,9 @@ import com.debate.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -16,8 +19,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     // 안 읽은 알림 개수 조회
     long countByUserAndIsReadFalse(User user);
 
-    // 특정 사용자의 모든 알림 읽음 처리 (필요 시 사용)
-    // @Modifying
-    // @Query("UPDATE Notification n SET n.isRead = true WHERE n.user = :user")
-    // void markAllAsRead(@Param("user") User user);
+    // 특정 사용자의 모든 알림 읽음 처리
+    @Modifying
+    @Query("UPDATE Notification n SET n.isRead = true WHERE n.user = :user AND n.isRead = false")
+    void markAllAsRead(@Param("user") User user);
 }

@@ -46,9 +46,10 @@ public class AdminCommentController {
         String[] sortParams = sort.split(",");
         String sortBy = sortParams[0];
         Sort.Direction direction = sortParams.length > 1 && "asc".equalsIgnoreCase(sortParams[1])
-                ? Sort.Direction.ASC : Sort.Direction.DESC;
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        
+
         Page<CommentResponse> comments = adminCommentService.getCommentsByDebate(debateId, pageable);
         return ResponseEntity.ok(ApiResponse.success(comments));
     }
@@ -64,14 +65,14 @@ public class AdminCommentController {
      */
     @Operation(summary = "댓글 목록 조회", description = "검색 조건에 따라 댓글 목록을 조회합니다. 최신순으로 정렬됩니다.")
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<Comment>>> getComments(
+    public ResponseEntity<ApiResponse<Page<CommentResponse>>> getComments(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Boolean isHidden,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         // 최신순으로 정렬 (createdAt 내림차순)
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Comment> comments = adminCommentService.searchComments(keyword, isHidden, pageable);
+        Page<CommentResponse> comments = adminCommentService.searchComments(keyword, isHidden, pageable);
         return ResponseEntity.ok(ApiResponse.success(comments));
     }
 
@@ -83,9 +84,9 @@ public class AdminCommentController {
      */
     @Operation(summary = "댓글 상세 조회", description = "댓글의 상세 정보를 조회합니다.")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Comment>> getCommentDetail(@PathVariable Long id) {
-        Comment comment = adminCommentService.getCommentById(id);
-        return ResponseEntity.ok(ApiResponse.success(comment));
+    public ResponseEntity<ApiResponse<CommentResponse>> getCommentDetail(@PathVariable Long id) {
+        CommentResponse commentResponse = adminCommentService.getCommentById(id);
+        return ResponseEntity.ok(ApiResponse.success(commentResponse));
     }
 
     /**
@@ -96,9 +97,9 @@ public class AdminCommentController {
      */
     @Operation(summary = "댓글 숨김 처리", description = "댓글의 숨김 상태를 토글합니다.")
     @PutMapping("/{id}/toggle-hidden")
-    public ResponseEntity<ApiResponse<Comment>> toggleCommentHidden(@PathVariable Long id) {
-        Comment comment = adminCommentService.toggleCommentHidden(id);
-        return ResponseEntity.ok(ApiResponse.success("댓글 숨김 상태가 변경되었습니다", comment));
+    public ResponseEntity<ApiResponse<CommentResponse>> toggleCommentHidden(@PathVariable Long id) {
+        CommentResponse commentResponse = adminCommentService.toggleCommentHidden(id);
+        return ResponseEntity.ok(ApiResponse.success("댓글 숨김 상태가 변경되었습니다", commentResponse));
     }
 
     /**
@@ -114,4 +115,3 @@ public class AdminCommentController {
         return ResponseEntity.ok(ApiResponse.success("댓글이 삭제되었습니다", null));
     }
 }
-
