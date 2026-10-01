@@ -1,356 +1,60 @@
-# 토론 사이트 (Debate) 프로젝트
+# Debate
 
-토론(debate) 플랫폼 프로젝트입니다.
+다양한 주제에 대해 찬반 입장을 선택하고, 댓글과 실시간 채팅으로 의견을 나누는 온라인 토론 플랫폼입니다.
 
-## 📋 목차
-
-- [페이지 구조](#페이지-구조)
-- [사이트맵](#사이트맵)
-- [회원 시스템](#회원-시스템)
-- [기술 스택 제안](#기술-스택-제안)
-- [프로젝트 구조](#프로젝트-구조)
-
-## 페이지 구조
-
-### 핵심 페이지
-
-1. **메인페이지** (`/`)
-   - 검색 기능
-   - 인기 토론, 최신 토론, 카테고리별 미리보기
-   - 랭킹 (인기 토론, 인기 사용자 등)
-   - 주요 기능 바로가기.
-
-2. **토론 목록** (`/debate`)
-   - 전체 토론 목록
-   - 필터링 (카테고리, 날짜, 인기순 등)
-   - 정렬 옵션
-
-3. **토론 상세** (`/debate/[id]`)
-   - 토론 주제 및 내용
-   - 찬성/반대 의견
-   - 댓글 시스템 (댓글의 댓글 작성 가능, 댓글 신고 기능)
-   - 실시간 채팅 (토론별 채팅방) - 토론 기간 동안만 가능
-   - 투표 기능 (찬성/반대) - 토론 기간 동안만 가능
-   - 좋아요/북마크
-   - 토론 기간 표시 및 상태 (진행중/종료)
-   - 토론 수정/삭제 (작성자만 가능, 토론 시작 전까지만 가능)
-   - 토론 신고 기능
-
-4. **토론 작성** (`/debate/create`)
-   - 새 토론 생성
-   - 카테고리 선택
-   - 찬성/반대 입장 명시
-   - 토론 기간 설정 (시작일시 ~ 종료일시)
-
-5. **토론 수정** (`/debate/[id]/edit`)
-   - 작성한 토론 수정 (작성자만 가능)
-   - 제목, 내용, 카테고리 수정
-   - 찬성/반대 입장 수정
-   - 토론 기간 수정 (토론 시작 전까지만 가능)
-
-6. **토론 삭제**
-   - 작성한 토론 삭제 (작성자만 가능, 토론 시작 전까지만 가능)
-   - 삭제 확인 후 처리
-   - 삭제된 토론은 목록에서 제외
-
-7. **검색** (`/search`)
-   - 키워드 검색
-   - 고급 검색 옵션
-
-8. **카테고리 목록** (`/categories`)
-   - 전체 카테고리 목록
-   - 카테고리별 토론 수 표시
-
-9. **카테고리별 토론** (`/categories/[category]`)
-   - 카테고리별 토론 목록
-   - 카테고리 정보
-
-10. **사용자 마이페이지** (`/users/[id]`)
-    - 다른 사용자의 마이페이지
-    - 프로필 정보 조회
-    - 작성한 토론 목록
-    - 참여한 토론 목록
-    - 사용자 신고 기능
-
-11. **신고 기능**
-    - 토론 신고: 토론 상세 페이지에서 신고 가능
-    - 댓글 신고: 각 댓글에 신고 버튼 제공
-    - 사용자 신고: 사용자 프로필 페이지에서 신고 가능
-    - 신고 사유 선택 및 상세 설명 입력
-    - 신고 제출 후 관리자 검토 대기
-    - 신고 처리 결과 확인 (선택사항)
-
-### 보조 페이지
-
-- `/about` - 사이트 소개
-- `/rules` - 이용 규칙 및 가이드라인
-
-## 사이트맵
-
-```
-/                              # 메인페이지
-├── /debate                      # 토론 목록
-│   ├── /debate/create           # 토론 작성
-│   ├── /debate/[id]             # 토론 상세
-│   └── /debate/[id]/edit        # 토론 수정
-├── /search                    # 검색
-├── /categories                # 카테고리 목록
-│   └── /categories/[category] # 카테고리별 토론
-├── /auth                      # 인증
-│   ├── /auth/login            # 로그인
-│   ├── /auth/register         # 회원가입
-│   ├── /auth/forgot-password  # 비밀번호 찾기
-│   ├── /auth/reset-password   # 비밀번호 재설정
-│   └── /auth/verify-email     # 이메일 인증
-├── /my                        # 마이페이지
-│   ├── /my/edit               # 프로필 수정
-│   ├── /my/settings           # 계정 설정
-│   └── /my/activity           # 활동 내역
-├── /users/[id]                # 다른 사용자 마이페이지
-├── /about                     # 소개
-└── /rules                     # 이용 규칙
-```
-
-## 회원 시스템
-
-### 인증 관련 페이지
-
-1. **회원가입** (`/auth/register`)
-   - 이메일 입력
-   - 비밀번호 설정
-   - 닉네임 설정
-   - 약관 동의
-   - 이메일 인증 (추후 작업 예정)
-
-2. **로그인** (`/auth/login`)
-   - 이메일 + 비밀번호 로그인
-   - 소셜 로그인 (구글, 카카오 등) (추후 작업 예정)
-   - "비밀번호 찾기" 링크
-   - "회원가입" 링크
-
-3. **비밀번호 찾기** (`/auth/forgot-password`)
-   - 이메일 입력
-   - 재설정 링크 이메일 발송 (추후 작업 예정)
-
-4. **비밀번호 재설정** (`/auth/reset-password`)
-   - 토큰 기반 재설정 페이지
-   - 새 비밀번호 입력
-
-5. **이메일 인증** (`/auth/verify-email`)
-   - 회원가입 후 이메일 인증 처리 (추후 작업 예정)
-
-### 마이페이지 관련
-
-6. **마이페이지** (`/my`)
-   - 대시보드: 내 활동 요약
-     - 내가 작성한 토론 수
-     - 내가 참여한 토론 수 (댓글/투표)
-     - 받은 좋아요 수
-     - 내 인기 토론 TOP 3
-     - 최근 활동 내역
-   - 프로필 정보 조회
-   - 내가 작성한 토론 목록
-   - 내가 참여한 토론 목록 (찬성/반대 표시 포함)
-   - 내가 작성한 댓글 목록 (댓글 및 대댓글, 해당 토론 제목 표시)
-   - 내가 좋아요/북마크한 토론
-
-7. **프로필 수정** (`/my/edit`)
-   - 닉네임 변경
-   - 프로필 이미지 업로드/변경
-   - 소개글 작성/수정
-   - 비밀번호 변경
-
-8. **계정 설정** (`/my/settings`)
-   - 알림 설정 (추후 작업 예정)
-   - 개인정보 설정 (추후 작업 예정)
-   - 계정 탈퇴
-
-9. **활동 내역** (`/my/activity`)
-   - 작성한 토론 목록
-   - 작성한 댓글 목록 (해당 토론 제목 표시)
-   - 투표 이력 (찬성/반대 표시 포함)
-   - 통계 (참여한 토론 수, 받은 좋아요 등)
+**4인 팀 프로젝트**로, 사용자 서비스와 관리자 서비스를 각각 별도의 프론트엔드·백엔드로 구성했습니다.
 
 ## 기술 스택
 
-### 프론트엔드
-- **React** - UI 라이브러리
-- **React Router** - 클라이언트 사이드 라우팅
-
-### 백엔드
-- **Java** - 프로그래밍 언어
-- **Spring Boot** - 백엔드 프레임워크
-- **JPA (Java Persistence API)** - ORM (Object-Relational Mapping)
-
-### 데이터베이스
-- **MySQL** - 관계형 데이터베이스
-- **JPA Repository** - 데이터 접근 계층
-
-### 인증
-- **JWT** (JSON Web Tokens) - 토큰 기반 인증
-- **Spring Security** - 인증 및 권한 관리
-- **BCrypt** - 비밀번호 암호화
-- **OAuth** - 소셜 로그인 (추후 작업 예정)
-
-### 실시간 통신
-- **WebSocket** - 실시간 양방향 통신
-- **Spring WebSocket** 또는 **Socket.IO** - 서버 측 WebSocket 지원
-
-### 기타
-- **이메일 서비스** - 추후 작업 예정
-- **파일 업로드** - 추후 결정 (AWS S3, Cloudinary 등)
-- **검색** - 추후 결정 (Elasticsearch 등)
+| 구분 | 사용 기술 |
+| --- | --- |
+| 프론트엔드 | React 18, React Router 6, Vite 5, Axios, CSS |
+| 백엔드 | Java 17, Spring Boot 3.2.0, Spring Data JPA |
+| 인증 | Spring Security, JWT, BCrypt |
+| 실시간 통신 | WebSocket, STOMP, SockJS |
+| 데이터베이스 | MySQL |
+| 배포 구성 | AWS EC2, Nginx |
 
 ## 프로젝트 구조
 
-### 프론트엔드 (React)
-
-```
-frontend/
-├── src/
-│   ├── pages/
-│   │   ├── HomePage.jsx
-│   │   ├── DebateListPage.jsx
-│   │   ├── DebateDetailPage.jsx
-│   │   ├── CreateDebatePage.jsx
-│   │   ├── EditDebatePage.jsx
-│   │   ├── LoginPage.jsx
-│   │   ├── RegisterPage.jsx
-│   │   ├── MyPage.jsx
-│   │   └── ...
-│   ├── components/
-│   │   ├── common/            # 공통 컴포넌트
-│   │   ├── debate/              # 토론 관련 컴포넌트
-│   │   ├── auth/              # 인증 관련 컴포넌트
-│   │   ├── user/              # 사용자 관련 컴포넌트
-│   │   └── report/            # 신고 관련 컴포넌트
-│   │       ├── ReportModal.jsx # 신고 모달
-│   │       └── ReportButton.jsx # 신고 버튼
-│   ├── services/              # API 서비스
-│   ├── utils/                 # 유틸리티 함수
-│   ├── hooks/                 # 커스텀 훅
-│   ├── context/               # Context API
-│   ├── routes/
-│   │   └── index.jsx          # 라우트 설정
-│   └── App.jsx
-├── public/
-│   └── images/                # 정적 이미지
-└── package.json
+```text
+Debate/
+├── DebateUser/
+│   ├── DebateUserBackEnd/     # 사용자 API · 인증 · 실시간 채팅
+│   └── DebateUserFrontEnd/    # 사용자 React 애플리케이션
+└── DebateAdmin/
+    ├── DebateAdminBackEnd/    # 관리자 API
+    └── DebateAdminFrontEnd/   # 관리자 React 애플리케이션
 ```
 
-### 백엔드 (Spring Boot)
-
-```
-backend/
-├── src/
-│   └── main/
-│       ├── java/
-│       │   └── com/debate/
-│       │       ├── DebateApplication.java
-│       │       ├── controller/       # REST 컨트롤러
-│       │       │   ├── AuthController.java
-│       │       │   ├── DebateController.java
-│       │       │   ├── UserController.java
-│       │       │   ├── CommentController.java
-│       │       │   ├── CategoryController.java
-│       │       │   ├── ReportController.java
-│       │       │   ├── ChatController.java
-│       │       │   └── ...
-│       │       ├── service/          # 비즈니스 로직
-│       │       │   ├── AuthService.java
-│       │       │   ├── DebateService.java
-│       │       │   ├── CommentService.java
-│       │       │   ├── CategoryService.java
-│       │       │   ├── ReportService.java
-│       │       │   ├── ChatService.java
-│       │       │   └── ...
-│       │       ├── repository/      # 데이터 접근 계층 (JPA Repository)
-│       │       │   ├── UserRepository.java
-│       │       │   ├── DebateRepository.java
-│       │       │   ├── CommentRepository.java
-│       │       │   ├── CategoryRepository.java
-│       │       │   ├── DebateOpinionRepository.java
-│       │       │   ├── LikeRepository.java
-│       │       │   ├── BookmarkRepository.java
-│       │       │   ├── ChatMessageRepository.java
-│       │       │   ├── ReportRepository.java
-│       │       │   └── ...
-│       │       ├── entity/          # 엔티티 클래스
-│       │       │   ├── User.java
-│       │       │   ├── Debate.java
-│       │       │   ├── Comment.java
-│       │       │   ├── Category.java
-│       │       │   ├── DebateOpinion.java
-│       │       │   ├── Like.java
-│       │       │   ├── Bookmark.java
-│       │       │   ├── ChatMessage.java
-│       │       │   ├── Report.java
-│       │       │   └── ...
-│       │       ├── dto/             # 데이터 전송 객체
-│       │       ├── config/          # 설정 클래스
-│       │       │   ├── SecurityConfig.java
-│       │       │   └── ...
-│       │       └── exception/       # 예외 처리
-│       └── resources/
-│           ├── application.yml      # 애플리케이션 설정
-│           └── application-dev.yml # 개발 환경 설정
-└── pom.xml (또는 build.gradle)
-```
+백엔드는 Controller · Service · Repository · Entity · DTO로 구성하고, 프론트엔드는 페이지 · 컴포넌트 · API 호출 모듈로 나누었습니다.
 
 ## 주요 기능
 
-### 토론 기능
-- [ ] 토론 작성
-- [ ] 토론 기간 설정 (시작일시 ~ 종료일시)
-- [ ] 토론 수정 (작성자만 가능, 토론 시작 전까지만 가능)
-- [ ] 토론 삭제 (작성자만 가능, 토론 시작 전까지만 가능)
-- [ ] 찬성/반대 의견 작성
-- [ ] 댓글 시스템 (대댓글 작성 가능)
-- [ ] 실시간 채팅 (토론별 채팅방) - 기간 동안만 가능
-- [ ] 투표 기능 (찬성/반대) - 기간 동안만 가능
-- [ ] 토론 상태 관리 (예정/진행중/종료)
-- [ ] 좋아요/북마크
-- [ ] 카테고리 분류
-- [ ] 검색 기능
-- [ ] 정렬 및 필터링
-- [ ] 토론 신고 기능
+### 토론 및 참여
 
-### 회원 기능
-- [ ] 회원가입
-- [ ] 로그인/로그아웃
-- [ ] 소셜 로그인 (추후 작업 예정)
-- [ ] 프로필 관리
-- [ ] 비밀번호 재설정
-- [ ] 이메일 인증 (추후 작업 예정)
-- [ ] 활동 내역 조회
+- 토론 작성·조회·수정·삭제
+- 카테고리별 조회, 키워드 검색, 정렬 및 페이지네이션
+- 토론 시작·종료 시간 설정과 상태 관리(예정·진행 중·종료)
+- 진행 중인 토론의 찬반 투표, 입장 변경 및 결과 조회
+- 댓글·대댓글 작성·수정·삭제, 댓글 좋아요 및 베스트 댓글 조회
+- 대댓글이 있는 댓글은 삭제 상태로 보존하고, 대댓글이 없는 댓글은 DB에서 삭제
+- 토론별 실시간 채팅 및 이전 메시지 조회
 
-### 신고 기능
-- [ ] 토론 신고 (토론 상세 페이지)
-- [ ] 댓글 신고 (각 댓글에 신고 버튼)
-- [ ] 사용자 신고 (사용자 프로필 페이지)
-- [ ] 신고 사유 선택 및 상세 설명 입력
-- [ ] 신고 제출 및 관리자 검토 대기
-- [ ] 신고 처리 결과 확인 (선택사항)
+### 회원 및 커뮤니티
 
-### 기타 기능
-- [ ] 메인페이지 검색 기능
-- [ ] 랭킹 시스템 (인기 토론, 인기 사용자 등)
-- [ ] 반응형 디자인
-- [ ] 다크 모드 (선택)
-- [ ] 알림 시스템
-- [ ] 관리자 기능 (선택)
+- 이메일 회원가입, JWT 기반 로그인 및 로그아웃
+- 닉네임·소개글·프로필 이미지 수정
+- 작성한 토론·댓글, 투표 및 좋아요 내역 조회
+- 토론 좋아요와 북마크(브라우저 `localStorage` 저장)
+- 쪽지 송수신·조회, 알림 조회 및 읽음 처리
+- 토론·사용자 신고 접수
 
-## 개발 시작하기
+### 관리자
 
-프로젝트 초기 설정 및 개발을 시작하려면:
-
-1. 원하는 기술 스택 선택
-2. 프로젝트 초기화
-3. 필요한 패키지 설치
-4. 데이터베이스 설정
-5. 기본 페이지 및 컴포넌트 생성
-
----
-
-**마지막 업데이트**: 2025년
-
+- 관리자 로그인
+- 회원 조회 및 계정 상태 관리
+- 토론 수정·상태 변경, 토론·댓글 숨김 및 삭제
+- 카테고리 등록·수정·삭제
+- 신고 조회 및 처리 상태 관리
+- 대시보드와 회원·토론 통계 조회
